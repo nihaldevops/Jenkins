@@ -1,0 +1,84 @@
+NEXUS PIPELINE
+=============
+                                        Nexus installation: will install in root only.start in root only
+										
+										Nexus repo - https://github.com/nihaldevops/simple-app.git
+                                              --------------------
+
+wget http://www.sonatype.org/downloads/nexus-latest-bundle.zip
+Yum install unzip. - to download unzip software
+unzip nexus-latest-bundle.zip
+Chmod 777 nexus-2.14.15-01
+cd nexus-2.14.14-01/bin
+RUN_AS_USER=root ./nexus start
+
+8081--default port   - publicip:8081/nexus
+default credentials are:
+admin
+admin123
+
+
+issue :
+
+not able to upload in nexus
+
+goto settings.xml  /opt/maven/conf/settings.xml and change the properties
+--------------------------------
+/opt/maven/conf<server>
+      <server>
+      <id>snapshots</id>
+      <username>admin</username>
+      <password>admin123</password>
+
+===> donwload nexus artifact uploader
+
+===> Create a new repository in nexus  i have created (/simpleapp-release/) repository
+Goto pipleine syntax provide all details
+
+sample step - nexus artifact uploader
+Nexus version - Nexus3
+protocol - HTTP
+Nexus URL - 18.218.187.235:8081/nexus/content/repositories/simpleapp-release/
+credentials - nexus admin admin123
+Groupid - in.javahome
+version - 1.0.0
+Repository - simpleapp-release
+
+Artifact id -simple-app
+Type - war
+classifier -empty
+File - target/simple-app-1.0.0.war
+
+Generate script and add in piepline script
+
+                nexusArtifactUploader artifacts: [[artifactId: 'simple-app', classifier: '', file: 'target/simple-app-1.0.0.war', type: 'war']], credentialsId: 'nexus', groupId: 'in.javahome', nexusUrl: '18.218.187.235:8081/nexus/content/repositories/simpleapp-release/', nexusVersion: 'nexus3', protocol: 'http', repository: 'simpleapp-release', version: '1.0.0'
+
+
+
+
+Goto jenkins create pipeline job
+
+pipeline {
+    agent any
+    environment {
+        PATH = "/opt/apache-maven-3.8.1/bin/:$PATH"
+    }
+
+    stages {
+        stage('fetch') {
+            steps {
+                git 'https://github.com/nihaldevops/simple-app.git'
+            }
+        }
+        stage('package') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+        stage('nexus upload') {
+            steps {
+                nexusArtifactUploader artifacts: [[artifactId: 'simple-app', classifier: '', file: 'target/simple-app-1.0.0.war', type: 'war']], credentialsId: 'nexus', groupId: 'in.javahome', nexusUrl: '18.218.187.235:8081/nexus/content/repositories/simpleapp-release/', nexusVersion: 'nexus3', protocol: 'http', repository: 'simpleapp-release', version: '1.0.0'
+            }
+        }
+    }
+}
