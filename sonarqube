@@ -1,0 +1,21 @@
+install sonarqube 
+install sonarscanner
+install sonarqube scanner
+Goto jenkins --> manage jenkins --> configure and give sonarqube server url and port no
+and create token in sonarqube and add that token here in configuraion
+
+Goto jenkins  --> manage jenkins   -->global tool configuraion
+here add sonarqube scanner  
+sonar name - sonar_scanner
+sonar path - /opt/sonar_scanner
+
+apply and save
+
+create a job in that conf --> build --> execute sonarqube scanner
+give analysis properties
+sonar.projectKey=Valaxy
+sonar.projectName=ValaxyDemo
+sonar.projectVersion=1.0
+sonar.sources=/var/lib/jenkins/workspace/$JOB_NAME/<PROJECT_NAME>/src
+
+and run . than you can see in sonarqube
